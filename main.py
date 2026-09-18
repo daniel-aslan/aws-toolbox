@@ -91,7 +91,7 @@ def list_all_ec2(regions):
                     running_instances.append = instance_id
                     pp(instance_id)
                     pp('-'*50)
-        regional_running_instances['region'] = running_instances
+        regional_running_instances[region] = running_instances
 
     return regional_running_instances
 
@@ -147,7 +147,7 @@ def main():
         pp(s3_storage_size(names))
 
     if args.list_all_ec2:
-        list_all_ec2(ec2_regions)
+        pp(list_all_ec2(ec2_regions))
 
     if args.list_all_ebs:
         pp(list_all_ebs_volumes(ec2_regions))
