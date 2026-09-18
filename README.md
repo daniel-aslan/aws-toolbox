@@ -6,6 +6,7 @@ A command-line tool for managing and inspecting AWS resources using boto3.
 
 - **S3 Operations**: List all S3 buckets and calculate their storage sizes
 - **EC2 Operations**: List all EC2 instances across all AWS regions and availability zones
+- **EBS Operations**: List all EBS volumes (attached and detached) across all AWS regions
 
 ## Installation
 
@@ -19,8 +20,8 @@ A command-line tool for managing and inspecting AWS resources using boto3.
 
 ```bash
 git clone <repository-url>
-cd aws_boto3
-uv pip install -r requirements.txt
+cd aws_toolbox
+uv add -r requirements.txt
 uv sync
 ```
 
@@ -34,6 +35,9 @@ uv run python main.py -ls3
 
 # EC2 operations
 uv run python main.py -ec2
+
+# EBS operations
+uv run python main.py -ebs
 ```
 
 ## Project Structure
@@ -41,7 +45,6 @@ uv run python main.py -ec2
 ```
 aws_boto3/
 ├── main.py           # Main CLI entry point (S3 + EC2)
-├── s3_list.py        # Standalone S3 listing script
 ├── src/aws_boto3/    # Package (minimal, for distribution)
 ├── pyproject.toml    # Project configuration
 ├── requirements.txt  # Dependencies
@@ -52,8 +55,6 @@ aws_boto3/
 
 - **boto3** - AWS SDK for Python
 - **argparse** - Command-line argument parsing
-- **paramiko** - SSH protocol library (for future EC2 SSH features)
-- **requests** - HTTP library
 
 ## Configuration
 
@@ -80,6 +81,7 @@ Currently no formal test suite exists. Test manually:
 ```bash
 uv run python main.py -ls3
 uv run python main.py -ec2
+uv run python main.py -ebs
 ```
 
 ### Code style

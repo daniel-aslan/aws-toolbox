@@ -10,10 +10,31 @@ parser.add_argument("-ls3", "--list_s3_buckets",
 parser.add_argument("-ec2", "--list_all_ec2",
                      action="store_true",
                      help="This flag will list all ec2 instances in aws")
+parser.add_argument("-ebs", "--list_all_ebs",
+                     action="store_true",
+                     help="This flag will list all ebs instances in aws")
 args = parser.parse_args()
 
 s3 = boto3.client('s3')
 ec2 = boto3.client('ec2')
+
+######################################### Regions Functions #####################################
+def list_all_regions(client):
+    response_reg = client.describe_regions()
+    regions = [] 
+    response_az = client.describe_availability_zones(
+            AllAvailabilityZones=True
+            )
+    avail_zones = [] 
+
+    for obj in response_reg.get("Regions"):
+        regions.append(obj.get("RegionName"))
+
+    for az in response_az.get('AvailabilityZones'):
+        avail_zones.append(az.get('ZoneName'))
+    
+    return regions
+
 
 ########################################### S3 Functions #######################################
 def list_all_s3_buckets(client):
@@ -44,21 +65,10 @@ def s3_storage_size(client, bucket_names):
 
     return bucket_and_size
 
+
 ######################################## EC2 Functions #######################################
-def list_all_ec2(client):
-    response_reg = client.describe_regions()
-    regions = [] 
-    response_az = client.describe_availability_zones(
-            AllAvailabilityZones=True
-            )
-    avail_zones = [] 
+def list_all_ec2(client,regions):
 
-    for obj in response_reg.get("Regions"):
-        regions.append(obj.get("RegionName"))
-
-    for az in response_az.get('AvailabilityZones'):
-        avail_zones.append(az.get('ZoneName'))
-    
     for region in regions:
         boto3.setup_default_session(region_name=region)
         paginator = client.get_paginator('describe_instances')
@@ -73,18 +83,65 @@ def list_all_ec2(client):
            pp(page)
            #pp(type(page.get('Reservations')))
 
+  
+######################################## EBS Functions #######################################
+def list_all_ebs_volumes(client,regions):
+    regional_attached_volumes = {}
+    regional_detached_volumes = {}
 
-    return regions,avail_zones
+    for region in regions:
+        attached_volumes = {}
+        detached_volumes = {}
+        boto3.setup_default_session(region_name=region)
+        paginator = client.get_paginator('describe_volumes')
+    
+        for page in paginator.paginate(Filters=[{
+                'Name': 'status',
+                'Values': ['in-use'],
+               },
+              ],
+             ):
+           pp(page.get('Volumes'))   
+           ebs_volumes = page.get('Volumes')
+           if ebs_volumes:
+              for volume in ebs_volumes:
+                 attached_volumes[volume.get('VolumeId')] = volume.get('Size')
+           else:
+              pass
+        
+        for page in paginator.paginate(Filters=[{
+                'Name': 'status',
+                'Values': ['available'],
+               },
+              ],
+             ):
+           pp(page.get('Volumes'))   
+           ebs_volumes = page.get('Volumes')
+           if ebs_volumes:
+              for volume in ebs_volumes:
+                 detached_volumes[volume.get('VolumeId')] = volume.get('Size')
+           else:
+              pass
+        
+        regional_attached_volumes[region] = attached_volumes
+        regional_detached_volumes[region] = detached_volumes
+
+    return regional_attached_volumes, regional_detached_volumes
 
 
 def main():
+    ec2_regions = list_all_regions(ec2)
+
     if args.list_s3_buckets:
         names = list_all_s3_buckets(s3)
         pp(s3_storage_size(s3, names))
 
     if args.list_all_ec2:
-        pp(type(list_all_ec2(ec2)))
-        pp(list_all_ec2(ec2))
+        pp(list_all_ec2(ec2,ec2_regions))
+
+    if args.list_all_ebs:
+        pp(list_all_ebs_volumes(ec2,ec2_regions))
+
 
 if __name__ == "__main__":
     main()
