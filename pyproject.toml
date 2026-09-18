@@ -1,0 +1,22 @@
+[project]
+name = "aws-boto3"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "daniel.aslan", email = "daniel.aslan@outlook.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "argparse>=1.4.0",
+    "boto3>=1.43.96",
+    "paramiko>=5.0.0",
+    "requests>=2.34.2",
+]
+
+[project.scripts]
+aws-boto3 = "aws_boto3:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
