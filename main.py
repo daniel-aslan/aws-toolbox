@@ -79,6 +79,7 @@ def list_all_ec2(client,regions):
             #},
             ],
             ):
+            pp(page)
            #pp(type(page.get('Reservations')))
 
   
