@@ -1,6 +1,5 @@
 import boto3
-import argparse, os, base64, re, paramiko, requests, csv
-from time import sleep, time, strftime
+import argparse
 from pprint import pprint as pp
 
 parser = argparse.ArgumentParser("AWS ToolBox")
@@ -80,7 +79,6 @@ def list_all_ec2(client,regions):
             #},
             ],
             ):
-           pp(page)
            #pp(type(page.get('Reservations')))
 
   
@@ -101,7 +99,6 @@ def list_all_ebs_volumes(client,regions):
                },
               ],
              ):
-           pp(page.get('Volumes'))   
            ebs_volumes = page.get('Volumes')
            if ebs_volumes:
               for volume in ebs_volumes:
@@ -115,7 +112,6 @@ def list_all_ebs_volumes(client,regions):
                },
               ],
              ):
-           pp(page.get('Volumes'))   
            ebs_volumes = page.get('Volumes')
            if ebs_volumes:
               for volume in ebs_volumes:
